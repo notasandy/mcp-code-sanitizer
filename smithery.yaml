@@ -1,0 +1,28 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - groqApiKey
+    properties:
+      groqApiKey:
+        type: string
+        description: "Groq API key from console.groq.com/keys"
+      groqModel:
+        type: string
+        description: "Groq model to use"
+        default: "llama-3.3-70b-versatile"
+      cacheTtl:
+        type: number
+        description: "Cache TTL in seconds"
+        default: 3600
+  commandFunction: |-
+    (config) => ({
+      command: "python",
+      args: ["server.py"],
+      env: {
+        GROQ_API_KEY: config.groqApiKey,
+        GROQ_MODEL: config.groqModel || "llama-3.3-70b-versatile",
+        CACHE_TTL: String(config.cacheTtl || 3600),
+      }
+    })
