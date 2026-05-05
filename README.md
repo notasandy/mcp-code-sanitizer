@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.notasandy/mcp-code-sanitizer -->
 # 🔍 mcp-code-sanitizer
 
 > A strict AI-powered code reviewer that runs your code through Groq LLM directly from Claude Desktop, Cursor, or any MCP-compatible agent.

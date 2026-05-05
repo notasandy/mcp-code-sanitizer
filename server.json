@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.notasandy/mcp-code-sanitizer",
+  "description": "Strict AI code reviewer powered by Groq. Finds bugs and vulnerabilities.",
+  "repository": {
+    "url": "https://github.com/notasandy/mcp-code-sanitizer",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "mcp-code-sanitizer",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GROQ_API_KEY",
+          "description": "Groq API key from console.groq.com/keys",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

@@ -20,7 +20,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
 .card+.card{margin-top:1.25rem}
 
-/* header */
 .header{background:linear-gradient(135deg,var(--surface),var(--surface2));padding:2rem;border-radius:var(--r);margin-bottom:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow)}
 .header h1{font-size:1.6rem;font-weight:700}
 .header h1 span{color:var(--purple)}
@@ -33,7 +32,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .verdict{font-size:1rem;line-height:1.6;color:var(--muted)}
 .verdict b{color:var(--text)}
 
-/* pills */
 .pills{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
 .pill{flex:1;min-width:110px;text-align:center;padding:.9rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow)}
 .pill .n{font-size:1.8rem;font-weight:800;line-height:1}
@@ -43,11 +41,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .pill.medium .n{color:var(--medium)}
 .pill.low .n{color:var(--low)}
 
-/* section */
 .sec-head{display:flex;align-items:center;gap:.6rem;padding:.9rem 1.25rem;font-weight:700;font-size:.95rem;border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--r) var(--r) 0 0}
 .sec-head .cnt{margin-left:auto;background:var(--border);border-radius:20px;padding:.1rem .55rem;font-size:.78rem;color:var(--muted)}
 
-/* issue */
 .issue{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
 .issue:last-child{border-bottom:none}
 .issue-top{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.5rem}
@@ -62,7 +58,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .fix-label{font-size:.72rem;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
 .fix{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.7rem 1rem;font-family:monospace;font-size:.85rem;color:var(--green);white-space:pre-wrap;word-break:break-all}
 
-/* warn / sug */
 .warn,.sug{padding:.85rem 1.25rem;border-bottom:1px solid var(--border)}
 .warn:last-child,.sug:last-child{border-bottom:none}
 .warn-title{font-weight:600;font-size:.9rem;color:var(--medium);margin-bottom:.3rem}
@@ -102,10 +97,10 @@ def _ring(score: int) -> str:
 
 
 def _issue_card(issue: dict) -> str:
-    sev   = issue.get("severity", "low")
-    line  = f'line {issue["line"]}' if issue.get("line") else ""
-    fix   = issue.get("fix", "")
-    fix_html = f'<div class="fix-label">Исправление</div><div class="fix">{fix}</div>' if fix else ""
+    sev      = issue.get("severity", "low")
+    line     = f'line {issue["line"]}' if issue.get("line") else ""
+    fix      = issue.get("fix", "")
+    fix_html = f'<div class="fix-label">Fix</div><div class="fix">{fix}</div>' if fix else ""
     return (
         f'<div class="issue">'
         f'<div class="issue-top">'
@@ -141,8 +136,8 @@ def build_html(data: dict, source_name: str = "") -> str:
 
     meta = "".join([
         f'<span><b>{filename}</b></span>' if filename else "",
-        f'<span>Язык: <b>{lang}</b></span>' if lang else "",
-        f'<span>Строк: <b>{lines}</b></span>' if lines else "",
+        f'<span>Language: <b>{lang}</b></span>' if lang else "",
+        f'<span>Lines: <b>{lines}</b></span>' if lines else "",
     ])
 
     header = (
@@ -151,7 +146,7 @@ def build_html(data: dict, source_name: str = "") -> str:
         f'<div class="meta">{meta}</div>'
         f'<div class="score-row">'
         f'{_ring(score)}'
-        f'<div class="verdict"><b>Вердикт:</b> {summary}</div>'
+        f'<div class="verdict"><b>Verdict:</b> {summary}</div>'
         f'</div></div>'
     )
 
@@ -161,30 +156,30 @@ def build_html(data: dict, source_name: str = "") -> str:
     ) if stats else ""
 
     sorted_issues = sorted(issues, key=lambda x: _SEVERITY_ORDER.index(x.get("severity", "low")))
-    issues_html   = "".join(_issue_card(i) for i in sorted_issues) or '<div class="empty">Проблем не найдено</div>'
+    issues_html   = "".join(_issue_card(i) for i in sorted_issues) or '<div class="empty">No issues found</div>'
     warns_html    = "".join(
         f'<div class="warn"><div class="warn-title">{w.get("title","")}</div>'
         f'<div class="warn-desc">{w.get("description","")}</div></div>'
         for w in warnings
-    ) or '<div class="empty">Предупреждений нет</div>'
+    ) or '<div class="empty">No warnings</div>'
     sugs_html = "".join(
         f'<div class="sug"><div class="sug-text">{s}</div></div>'
         for s in suggestions
-    ) or '<div class="empty">Рекомендаций нет</div>'
+    ) or '<div class="empty">No suggestions</div>'
 
     body = (
         header
         + (f'<div class="pills">{pills}</div>' if pills else "")
-        + _section("🔴", "Проблемы", issues_html, len(issues))
-        + _section("⚠️", "Предупреждения", warns_html, len(warnings))
-        + _section("💡", "Рекомендации", sugs_html, len(suggestions))
+        + _section("🔴", "Issues", issues_html, len(issues))
+        + _section("⚠️", "Warnings", warns_html, len(warnings))
+        + _section("💡", "Suggestions", sugs_html, len(suggestions))
         + '<div class="footer">Generated by <b>mcp-code-sanitizer</b> · Powered by Groq</div>'
     )
 
     return (
-        f'<!DOCTYPE html><html lang="ru"><head>'
+        f'<!DOCTYPE html><html lang="en"><head>'
         f'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>Code Sanitizer — {filename or "Отчёт"}</title>'
+        f'<title>Code Sanitizer — {filename or "Report"}</title>'
         f'<style>{_CSS}</style></head>'
         f'<body><div class="wrap">{body}</div></body></html>'
     )
@@ -196,20 +191,20 @@ async def generate_report(
     source_name: str = "",
 ) -> str:
     """
-    Генерирует красивый HTML-отчёт из результата analyze_code / analyze_file.
+    Generates a beautiful HTML report from analyze_code or analyze_file results.
 
     Args:
-        analysis_json: JSON-строка из analyze_code или analyze_file.
-        output_path:   Путь для сохранения HTML (необязательно).
-        source_name:   Название файла/фрагмента для заголовка.
+        analysis_json: JSON string from analyze_code or analyze_file.
+        output_path:   Path to save the HTML file (optional).
+        source_name:   File/fragment name for the report title.
 
     Returns:
-        JSON с полями html и saved_to.
+        JSON with fields: html, saved_to, length.
     """
     try:
         data = json.loads(analysis_json)
     except json.JSONDecodeError as e:
-        return error_response("Невалидный JSON в analysis_json", str(e))
+        return error_response("Invalid JSON in analysis_json", str(e))
 
     html     = build_html(data, source_name=source_name)
     saved_to = ""
@@ -221,6 +216,6 @@ async def generate_report(
             out.write_text(html, encoding="utf-8")
             saved_to = str(out)
         except OSError as e:
-            return error_response("Не удалось сохранить файл", str(e))
+            return error_response("Failed to save file", str(e))
 
     return json.dumps({"html": html, "saved_to": saved_to, "length": len(html)}, ensure_ascii=False)

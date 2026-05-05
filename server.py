@@ -1,14 +1,14 @@
 """
-mcp-code-sanitizer — MCP-сервер для ревью кода через Groq.
+mcp-code-sanitizer — MCP server for AI-powered code review using Groq.
 
-Инструменты:
-  analyze_code    — находит баги и уязвимости в фрагменте кода
-  compare_code    — сравнивает две версии, оценивает регрессии
-  explain_code    — объясняет код пошагово для junior/middle/senior
-  generate_tests  — генерирует pytest/jest/... тесты
-  analyze_file    — анализирует целый файл с диска (с чанкингом)
-  generate_report — строит красивый HTML-отчёт из результата анализа
-  cache_info      — статистика кэша и его очистка
+Tools:
+  analyze_code    — finds bugs and vulnerabilities in a code fragment
+  compare_code    — compares two versions, detects regressions
+  explain_code    — explains code step by step for junior/middle/senior
+  generate_tests  — generates pytest/jest/... tests
+  analyze_file    — analyzes a whole file from disk (with chunking)
+  generate_report — builds a beautiful HTML report from analysis results
+  cache_info      — cache statistics and clearing
 """
 
 import sys
@@ -24,7 +24,7 @@ from tools import (
 
 mcp = FastMCP(
     name="code-sanitizer",
-    instructions="Набор инструментов для строгого ревью кода через Groq LLM.",
+    instructions="A toolkit for strict AI-powered code review using Groq LLM.",
 )
 
 mcp.tool()(analyze_code)

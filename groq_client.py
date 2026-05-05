@@ -11,9 +11,9 @@ MAX_TOKENS  = 2048
 
 
 async def call(system: str, user: str, json_mode: bool = True) -> str:
-    """Отправляет запрос в Groq. При 429 ждёт и повторяет автоматически."""
+    """Send a request to Groq. Automatically retries on 429 rate limit errors."""
     if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY не задан. Укажи его в .env или переменной окружения.")
+        raise ValueError("GROQ_API_KEY is not set. Add it to .env or set it as an environment variable.")
 
     payload: dict = {
         "model": GROQ_MODEL,

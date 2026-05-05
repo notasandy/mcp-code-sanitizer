@@ -4,13 +4,13 @@ import cache
 
 async def cache_info(clear: bool = False) -> str:
     """
-    Показывает статистику кэша или очищает его.
+    Shows cache statistics or clears the cache.
 
     Args:
-        clear: True — очищает кэш, False — показывает статистику.
+        clear: True — clears the cache, False — shows statistics.
 
     Returns:
-        JSON со статистикой или результатом очистки.
+        JSON with cache stats or clear result.
     """
     if clear:
         removed = cache.clear()

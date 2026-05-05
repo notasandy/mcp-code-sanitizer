@@ -7,33 +7,33 @@ import cache
 
 async def generate_tests(code: str, language: str = "python", framework: str = "") -> str:
     """
-    Генерирует тесты для переданного кода.
+    Generates tests for the provided code.
 
     Args:
-        code:      Код для тестирования.
-        language:  Язык программирования.
-        framework: Фреймворк (опционально — pytest, jest, unittest и т.д.).
+        code:      Code to generate tests for.
+        language:  Programming language.
+        framework: Test framework (optional — pytest, jest, unittest, etc.).
 
     Returns:
-        JSON с тест-кейсами, кодом тестов и оценкой покрытия.
+        JSON with test cases, runnable test code, and coverage estimate.
     """
     if not code.strip():
-        return error_response("Передан пустой код.")
+        return error_response("Empty code provided.")
 
     key = cache.make_key("generate_tests", code, language, framework)
     if hit := cache.get(key):
         return hit
 
-    framework_block = f"\nИспользуй фреймворк: {framework}" if framework else ""
-    user = f"Язык: {language}{framework_block}\n\nКод:\n```{language}\n{code}\n```"
+    framework_block = f"\nUse framework: {framework}" if framework else ""
+    user = f"Language: {language}{framework_block}\n\nCode:\n```{language}\n{code}\n```"
 
     try:
         raw = await call(TESTS, user)
         result = json.loads(raw)
     except httpx.HTTPStatusError as e:
-        return error_response(f"Groq API ошибка {e.response.status_code}", e.response.text[:300])
+        return error_response(f"Groq API error {e.response.status_code}", e.response.text[:300])
     except json.JSONDecodeError as e:
-        return error_response("Groq вернул невалидный JSON", str(e))
+        return error_response("Groq returned invalid JSON", str(e))
     except ValueError as e:
         return error_response(str(e))
 

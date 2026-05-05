@@ -7,35 +7,35 @@ import cache
 
 async def explain_code(code: str, language: str = "python", audience: str = "junior") -> str:
     """
-    Объясняет что делает код — пошагово и понятно.
+    Explains what code does — step by step and clearly.
 
     Args:
-        code:     Код для объяснения.
-        language: Язык программирования.
-        audience: Уровень аудитории — junior, middle или senior.
+        code:     Code to explain.
+        language: Programming language.
+        audience: Target audience level — junior, middle, or senior.
 
     Returns:
-        JSON с пошаговым объяснением, концепциями и подводными камнями.
+        JSON with step-by-step explanation, key concepts, and gotchas.
     """
     if not code.strip():
-        return error_response("Передан пустой код.")
+        return error_response("Empty code provided.")
 
     key = cache.make_key("explain_code", code, language, audience)
     if hit := cache.get(key):
         return hit
 
     user = (
-        f"Язык: {language}\nУровень аудитории: {audience}\n\n"
-        f"Код:\n```{language}\n{code}\n```"
+        f"Language: {language}\nAudience level: {audience}\n\n"
+        f"Code:\n```{language}\n{code}\n```"
     )
 
     try:
         raw = await call(EXPLAIN, user)
         result = json.loads(raw)
     except httpx.HTTPStatusError as e:
-        return error_response(f"Groq API ошибка {e.response.status_code}", e.response.text[:300])
+        return error_response(f"Groq API error {e.response.status_code}", e.response.text[:300])
     except json.JSONDecodeError as e:
-        return error_response("Groq вернул невалидный JSON", str(e))
+        return error_response("Groq returned invalid JSON", str(e))
     except ValueError as e:
         return error_response(str(e))
 

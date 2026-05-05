@@ -1,0 +1,7 @@
+{
+  "name": "mcp-code-sanitizer",
+  "description": "Strict AI code reviewer powered by Groq. Finds bugs, vulnerabilities and security issues.",
+  "license": "MIT",
+  "categories": ["developer-tools", "security", "ai-and-machine-learning"],
+  "keywords": ["code-review", "security", "groq", "llm", "mcp", "python", "static-analysis"]
+}

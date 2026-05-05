@@ -13,7 +13,7 @@ MAX_FILE_SIZE_KB = 500
 
 
 def _split_into_chunks(code: str) -> list[tuple[int, str]]:
-    """Разбивает код на чанки по целым строкам → [(start_line, text), ...]."""
+    """Split code into chunks by whole lines → [(start_line, text), ...]."""
     chunks, current, current_len, start = [], [], 0, 1
     for i, line in enumerate(code.splitlines(), 1):
         current.append(line)
@@ -36,7 +36,7 @@ def _build_single_result(filename: str, lang: str, total_lines: int, result: dic
     stats = {s: sum(1 for i in issues if i.get("severity") == s) for s in SEVERITY_ORDER}
     return {
         "file": filename, "language": lang, "lines": total_lines,
-        "summary": result.get("summary", "Анализ завершён"),
+        "summary": result.get("summary", "Analysis complete."),
         "score": _compute_score(issues),
         "issues": issues,
         "warnings": result.get("warnings", []),
@@ -52,7 +52,7 @@ def _merge_chunk_results(filename: str, lang: str, total_lines: int, chunk_resul
     stats = {s: sum(1 for i in all_issues if i.get("severity") == s) for s in SEVERITY_ORDER}
     return {
         "file": filename, "language": lang, "lines": total_lines,
-        "summary": f"Найдено {len(all_issues)} проблем в файле",
+        "summary": f"Found {len(all_issues)} issue(s) across the file.",
         "score": _compute_score(all_issues),
         "issues": sorted(all_issues, key=lambda x: SEVERITY_ORDER.index(x.get("severity", "low"))),
         "warnings": all_warnings,
@@ -63,38 +63,38 @@ def _merge_chunk_results(filename: str, lang: str, total_lines: int, chunk_resul
 
 async def analyze_file(file_path: str, language: str = "", context: str = "") -> str:
     """
-    Анализирует целый файл с кодом на диске.
-    Автоматически определяет язык по расширению.
-    Большие файлы разбиваются на чанки и анализируются параллельно.
+    Analyzes a whole code file from disk.
+    Automatically detects language by file extension.
+    Large files are split into chunks and analyzed in parallel.
 
     Args:
-        file_path: Абсолютный путь к файлу.
-        language:  Язык (если не задан — определяется по расширению).
-        context:   Описание что делает файл (необязательно).
+        file_path: Absolute path to the file.
+        language:  Language override (auto-detected from extension if not set).
+        context:   Description of what the file does (optional).
 
     Returns:
-        JSON с issues, warnings, suggestions, score, stats.
+        JSON with issues, warnings, suggestions, score, stats.
     """
     path = Path(file_path).expanduser().resolve()
     if not path.exists():
-        return error_response(f"Файл не найден: {file_path}")
+        return error_response(f"File not found: {file_path}")
     if not path.is_file():
-        return error_response(f"Это не файл: {file_path}")
+        return error_response(f"Not a file: {file_path}")
 
     size_kb = path.stat().st_size / 1024
     if size_kb > MAX_FILE_SIZE_KB:
         return error_response(
-            f"Файл слишком большой ({size_kb:.0f} КБ). Максимум — {MAX_FILE_SIZE_KB} КБ.",
-            "Передай фрагмент через analyze_code.",
+            f"File too large ({size_kb:.0f} KB). Maximum is {MAX_FILE_SIZE_KB} KB.",
+            "Use analyze_code with a smaller fragment instead.",
         )
 
     try:
         code = path.read_text(encoding="utf-8", errors="replace")
     except OSError as e:
-        return error_response("Не удалось прочитать файл", str(e))
+        return error_response("Failed to read file", str(e))
 
     if not code.strip():
-        return error_response("Файл пустой.")
+        return error_response("File is empty.")
 
     key = cache.make_key("analyze_file", str(path), str(path.stat().st_mtime), language, context)
     if hit := cache.get(key):
@@ -109,10 +109,10 @@ async def analyze_file(file_path: str, language: str = "", context: str = "") ->
 
     async def _analyze_chunk(num: int, start: int, text: str) -> dict:
         system = FILE_CHUNK.format(chunk_num=num, total=len(chunks))
-        ctx    = f"\nКонтекст: {context}" if context else ""
+        ctx    = f"\nContext: {context}" if context else ""
         user   = (
-            f"Файл: {filename} | Язык: {lang}{ctx}\n"
-            f"Строки {start}–{start + text.count(chr(10))}\n\n"
+            f"File: {filename} | Language: {lang}{ctx}\n"
+            f"Lines {start}–{start + text.count(chr(10))}\n\n"
             f"```{lang}\n{text}\n```"
         )
         async with semaphore:
@@ -128,18 +128,17 @@ async def analyze_file(file_path: str, language: str = "", context: str = "") ->
             for i, (start, text) in enumerate(chunks)
         ])
     except httpx.HTTPStatusError as e:
-        return error_response(f"Groq API ошибка {e.response.status_code}", e.response.text[:300])
+        return error_response(f"Groq API error {e.response.status_code}", e.response.text[:300])
     except ValueError as e:
         return error_response(str(e))
 
     if len(chunks) == 1:
         final = _build_single_result(filename, lang, total_lines, results[0])
     else:
-        # Для больших файлов пробуем свести через Groq, fallback — локальный merge
         merged = _merge_chunk_results(filename, lang, total_lines, list(results))
         try:
             system = FILE_SUMMARY.format(filename=filename, language=lang, lines=total_lines)
-            user   = f"Результаты анализа {len(chunks)} частей:\n\n{json.dumps(merged, ensure_ascii=False)}"
+            user   = f"Analysis results from {len(chunks)} parts:\n\n{json.dumps(merged, ensure_ascii=False)}"
             raw    = await call(system, user)
             final  = json.loads(raw)
         except Exception:
