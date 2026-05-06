@@ -1,0 +1,33 @@
+name: 'AI Code Review (Groq)'
+description: 'Automatic code review for PRs using Groq LLM. Finds bugs, SQL injections, security issues.'
+author: 'notasandy'
+
+inputs:
+  groq_api_key:
+    description: 'Groq API key from console.groq.com'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - run: pip install httpx
+      shell: bash
+    - run: python ${{ github.action_path }}/.github/scripts/review_pr.py
+      shell: bash
+      env:
+        GROQ_API_KEY: ${{ inputs.groq_api_key }}
+        GITHUB_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        REPO: ${{ github.repository }}
+
+branding:
+  icon: 'shield'
+  color: 'purple'
