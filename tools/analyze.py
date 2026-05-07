@@ -37,6 +37,6 @@ async def analyze_code(code: str, language: str = "python", context: str = "") -
     except ValueError as e:
         return error_response(str(e))
 
-    out = json.dumps(result, ensure_ascii=False, indent=2)
+    out = json.dumps(result, indent=2)
     cache.set(key, out)
     return out

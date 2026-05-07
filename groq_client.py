@@ -64,4 +64,4 @@ def _strip_fences(raw: str) -> str:
 
 
 def error_response(msg: str, detail: str = "") -> str:
-    return json.dumps({"error": msg, "detail": detail}, ensure_ascii=False)
+    return json.dumps({"error": msg, "detail": detail})

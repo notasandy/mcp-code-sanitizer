@@ -14,9 +14,8 @@ Tools:
 import sys
 import io
 
-if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
-    sys.stdin  = io.TextIOWrapper(sys.stdin.buffer,  encoding="utf-8")
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
 
 from pathlib import Path
 
