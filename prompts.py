@@ -48,12 +48,12 @@ Explain the code clearly. Return ONLY valid JSON, no Markdown.
 
 Format:
 {
-  "summary": "One sentence — what this code does",
+  "summary": "One sentence - what this code does",
   "purpose": "What problem it solves and why it exists",
   "how_it_works": [{"step": 1, "title": "...", "description": "..."}],
   "key_concepts": [{"concept": "...", "explanation": "..."}],
   "gotchas": ["Non-obvious detail or pitfall in this code"],
-  "complexity": {"time": "O(n) — explanation", "space": "O(1) — explanation"}
+  "complexity": {"time": "O(n) - explanation", "space": "O(1) - explanation"}
 }
 
 Write for junior/middle developers. Explain jargon when used.
@@ -95,7 +95,7 @@ Format:
   "suggestions": ["..."]
 }}
 
-This is a fragment — do not penalize for missing imports or missing context.
+This is a fragment - do not penalize for missing imports or missing context.
 """
 
 FILE_SUMMARY = """\
@@ -107,7 +107,7 @@ Format:
   "file": "{filename}", "language": "{language}", "lines": {lines},
   "summary": "One-sentence overall verdict",
   "score": <0-100>,
-  "issues": [...all unique issues sorted by severity: critical→high→medium→low...],
+  "issues": [...all unique issues sorted by severity: critical->high->medium->low...],
   "warnings": [...], "suggestions": [...],
   "stats": {{"critical": 0, "high": 0, "medium": 0, "low": 0}}
 }}
