@@ -1,4 +1,5 @@
 """
+"""
 mcp-code-sanitizer - MCP server for AI-powered code review using Groq.
 Tools:
   analyze_code    - finds bugs and vulnerabilities in a code fragment
