@@ -37,6 +37,6 @@ async def generate_tests(code: str, language: str = "python", framework: str = "
     except ValueError as e:
         return error_response(str(e))
 
-    out = json.dumps(result, indent=2)
+    out = json.dumps(result, ensure_ascii=True, indent=2)
     cache.set(key, out)
     return out

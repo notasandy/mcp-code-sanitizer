@@ -218,4 +218,4 @@ async def generate_report(
         except OSError as e:
             return error_response("Failed to save file", str(e))
 
-    return json.dumps({"html": html, "saved_to": saved_to, "length": len(html)})
+    return json.dumps({"html": html, "saved_to": saved_to, "length": len(html)}, ensure_ascii=True)

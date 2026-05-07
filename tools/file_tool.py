@@ -138,12 +138,12 @@ async def analyze_file(file_path: str, language: str = "", context: str = "") ->
         merged = _merge_chunk_results(filename, lang, total_lines, list(results))
         try:
             system = FILE_SUMMARY.format(filename=filename, language=lang, lines=total_lines)
-            user   = f"Analysis results from {len(chunks)} parts:\n\n{json.dumps(merged)}"
+            user   = f"Analysis results from {len(chunks)} parts:\n\n{json.dumps(merged, ensure_ascii=True)}"
             raw    = await call(system, user)
             final  = json.loads(raw)
         except Exception:
             final  = merged
 
-    out = json.dumps(final, indent=2)
+    out = json.dumps(final, ensure_ascii=True, indent=2)
     cache.set(key, out)
     return out

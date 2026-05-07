@@ -14,5 +14,5 @@ async def cache_info(clear: bool = False) -> str:
     """
     if clear:
         removed = cache.clear()
-        return json.dumps({"cleared": True, "removed_entries": removed}, indent=2)
-    return json.dumps(cache.stats(), indent=2)
+        return json.dumps({"cleared": True, "removed_entries": removed}, ensure_ascii=True, indent=2)
+    return json.dumps(cache.stats(), ensure_ascii=True, indent=2)
