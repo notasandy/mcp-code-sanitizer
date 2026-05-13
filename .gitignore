@@ -6,8 +6,7 @@ build/
 .venv/
 venv/
 .env
-*.cast
-*.gif
+# demo files are tracked (demo.cast, demo.svg, make_demo.py)
 claude_desktop_config.json
 .claude/
 debug.log
