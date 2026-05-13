@@ -1,7 +1,6 @@
 import asyncio
 import json
 import re
-import pathlib
 import httpx
 from config import GROQ_API_KEY, GROQ_API_URL, GROQ_MODEL
 MAX_RETRIES = 4
@@ -40,9 +39,6 @@ async def call(system: str, user: str, json_mode: bool = True) -> str:
         data.get("choices", [{}])[0]
         .get("message", {})
         .get("content", "")
-    )
-    pathlib.Path("debug.log").write_text(
-        repr(raw[:500]), encoding="utf-8"
     )
     return _strip_fences(raw)
 def _parse_retry_after(response: httpx.Response) -> float:
