@@ -1,18 +1,19 @@
 <!-- mcp-name: io.github.notasandy/mcp-code-sanitizer -->
 # mcp-code-sanitizer
 
-> Strict AI-powered code reviewer for Claude Desktop, Cursor, and any MCP-compatible agent.
+> Strict AI-powered code reviewer for Claude Desktop, Cursor, VS Code, and Claude Code CLI.
 > Finds bugs, vulnerabilities, and security issues — powered by Groq (free API).
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
+![PyPI](https://img.shields.io/pypi/v/mcp-code-sanitizer?color=blue)
 ![FastMCP](https://img.shields.io/badge/FastMCP-2.x-purple)
 ![Groq](https://img.shields.io/badge/Groq-Free_API-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 [![smithery badge](https://smithery.ai/badge/io.github.notasandy/mcp-code-sanitizer)](https://smithery.ai/server/io.github.notasandy/mcp-code-sanitizer)
 
 ```
-Claude Desktop / Cursor  ──MCP──►  code-sanitizer  ──REST──►  Groq API
-                                     (server.py)               (llama-3.3-70b)
+Claude / Cursor / VS Code  ──MCP──►  code-sanitizer  ──REST──►  Groq API
+                                        (server.py)              (llama-3.3-70b)
 ```
 
 ![demo](demo.svg)
@@ -53,42 +54,19 @@ Claude Desktop / Cursor  ──MCP──►  code-sanitizer  ──REST──►
 
 ---
 
-## Quick Start
+## Installation
 
-### 1. Clone and install
+> **Prerequisite:** Get a free Groq API key at [console.groq.com/keys](https://console.groq.com/keys) — no credit card required.
 
-```bash
-git clone https://github.com/notasandy/mcp-code-sanitizer
-cd mcp-code-sanitizer
-
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-pip install -r requirements.txt
-```
-
-### 2. Add your Groq API key
-
-Get a free key at [console.groq.com/keys](https://console.groq.com/keys) — no credit card required.
+### Claude Code CLI
 
 ```bash
-cp .env.example .env
-# edit .env and set GROQ_API_KEY=gsk_...
+claude mcp add code-sanitizer -e GROQ_API_KEY=gsk_your_key -- uvx mcp-code-sanitizer
 ```
 
-### 3. Test the server
+### Claude Desktop
 
-```bash
-python server.py
-```
-
-Silence means it's working — the server is listening for MCP requests via stdio.
-
----
-
-## Connect to Claude Desktop
-
-| OS | Config path |
+| OS | Config file |
 |---|---|
 | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
 | Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
@@ -98,8 +76,8 @@ Silence means it's working — the server is listening for MCP requests via stdi
 {
   "mcpServers": {
     "code-sanitizer": {
-      "command": "/full/path/to/venv/bin/python",
-      "args": ["/full/path/to/server.py"],
+      "command": "uvx",
+      "args": ["mcp-code-sanitizer"],
       "env": {
         "GROQ_API_KEY": "gsk_your_key_here"
       }
@@ -108,26 +86,66 @@ Silence means it's working — the server is listening for MCP requests via stdi
 }
 ```
 
-> **Windows example:**
-> `"command": "C:\\Users\\YourName\\mcp-code-sanitizer\\venv\\Scripts\\python.exe"`
+### Cursor
 
-Restart Claude Desktop — you'll see the tools icon in chat.
-
----
-
-## Connect to Cursor
-
-Create `.cursor/mcp.json` in your project root:
+Create `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` globally):
 
 ```json
 {
   "mcpServers": {
     "code-sanitizer": {
-      "command": "/full/path/to/venv/bin/python",
-      "args": ["/full/path/to/server.py"],
-      "env": {"GROQ_API_KEY": "gsk_your_key_here"}
+      "command": "uvx",
+      "args": ["mcp-code-sanitizer"],
+      "env": {
+        "GROQ_API_KEY": "gsk_your_key_here"
+      }
     }
   }
+}
+```
+
+### VS Code
+
+Requires VS Code 1.99+ with GitHub Copilot. Create `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "code-sanitizer": {
+      "command": "uvx",
+      "args": ["mcp-code-sanitizer"],
+      "env": {
+        "GROQ_API_KEY": "gsk_your_key_here"
+      }
+    }
+  }
+}
+```
+
+Or add globally via **Ctrl+Shift+P → "MCP: Add Server"**.
+
+> **Don't have `uvx`?** Install it with `pip install uv`, then use the commands above.
+
+---
+
+## Manual install (alternative)
+
+If you prefer cloning the repo:
+
+```bash
+git clone https://github.com/notasandy/mcp-code-sanitizer
+cd mcp-code-sanitizer
+pip install -r requirements.txt
+cp .env.example .env   # add your GROQ_API_KEY
+python server.py
+```
+
+Then point the client config to:
+```json
+{
+  "command": "python",
+  "args": ["/full/path/to/server.py"],
+  "env": { "GROQ_API_KEY": "gsk_your_key_here" }
 }
 ```
 
@@ -135,7 +153,7 @@ Create `.cursor/mcp.json` in your project root:
 
 ## GitHub Action — automatic PR review
 
-Add AI code review to any repository in 5 lines.  
+Add AI code review to any repository in 5 lines.
 The action posts a structured comment on every PR with score, issues, and fix suggestions.
 
 ```yaml
@@ -153,7 +171,7 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: notasandy/mcp-code-sanitizer@main
+      - uses: notasandy/mcp-code-sanitizer@v1
         with:
           groq_api_key: ${{ secrets.GROQ_API_KEY }}
 ```
@@ -169,7 +187,7 @@ The action automatically:
 
 ## Usage in chat
 
-After connecting, just write naturally in Claude Desktop or Cursor:
+After connecting, just write naturally:
 
 ```
 Review this code for vulnerabilities:
@@ -232,28 +250,6 @@ All settings via `.env` or environment variables:
 
 ---
 
-## Testing with MCP Inspector
-
-```bash
-fastmcp dev inspector server.py
-```
-
-A browser UI opens with full tool testing interface.
-
----
-
-## Requirements
-
-```
-fastmcp>=2.3.0
-httpx>=0.27.0
-python-dotenv>=1.0.0
-```
-
-Python 3.10+
-
----
-
 ## Contributing
 
 PRs and Issues are welcome. Most wanted:
@@ -272,7 +268,9 @@ MIT — do whatever you want. A star would be appreciated.
 
 ## Links
 
+- [PyPI](https://pypi.org/project/mcp-code-sanitizer/)
 - [Groq Console — free API key](https://console.groq.com)
 - [FastMCP docs](https://gofastmcp.com)
 - [MCP specification](https://modelcontextprotocol.io)
-- [Smithery — MCP server catalog](https://smithery.ai/server/io.github.notasandy/mcp-code-sanitizer)
+- [Smithery](https://smithery.ai/server/io.github.notasandy/mcp-code-sanitizer)
+- [MCP Registry](https://registry.modelcontextprotocol.io)
