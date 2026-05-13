@@ -15,6 +15,8 @@ Claude Desktop / Cursor  ──MCP──►  code-sanitizer  ──REST──►
                                      (server.py)               (llama-3.3-70b)
 ```
 
+![demo](demo.svg)
+
 ---
 
 ## Features
