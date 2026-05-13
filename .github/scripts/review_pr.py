@@ -13,7 +13,7 @@ import sys
 import urllib.request
 import urllib.error
 
-# ── Config ────────────────────────────────────────────────────────────────────
+#        Config                                                                                                                                                                                                             
 GROQ_API_KEY  = os.environ["GROQ_API_KEY"]
 GITHUB_TOKEN  = os.environ["GITHUB_TOKEN"]
 REPO          = os.environ["REPO"]
@@ -31,7 +31,7 @@ REVIEWABLE_EXTENSIONS = {
     ".rb", ".php", ".swift", ".kt", ".sh", ".sql",
 }
 
-MAX_FILE_CHARS = 8_000   # ~4k tokens — safe for free Groq tier
+MAX_FILE_CHARS = 8_000   # ~4k tokens     safe for free Groq tier
 MAX_FILES      = 10      # don't review more than 10 files per PR
 
 SYSTEM_PROMPT = """\
@@ -64,7 +64,7 @@ Rules:
 """
 
 
-# ── Groq call ─────────────────────────────────────────────────────────────────
+#        Groq call                                                                                                                                                                                                    
 def call_groq(diff: str, filename: str) -> dict:
     payload = json.dumps({
         "model": GROQ_MODEL,
@@ -94,7 +94,7 @@ def call_groq(diff: str, filename: str) -> dict:
     return json.loads(raw)
 
 
-# ── GitHub API ────────────────────────────────────────────────────────────────
+#        GitHub API                                                                                                                                                                                                 
 def github_request(method: str, path: str, body: dict | None = None) -> dict:
     url  = f"{GITHUB_API}/{path}"
     data = json.dumps(body).encode() if body else None
@@ -120,13 +120,13 @@ def delete_old_bot_comments() -> None:
     try:
         comments = github_request("GET", f"repos/{REPO}/issues/{PR_NUMBER}/comments")
         for c in comments:
-            if c.get("user", {}).get("login") == "github-actions[bot]" and "🔍 AI Code Review" in c.get("body", ""):
+            if c.get("user", {}).get("login") == "github-actions[bot]" and "     AI Code Review" in c.get("body", ""):
                 github_request("DELETE", f"repos/{REPO}/issues/comments/{c['id']}")
     except Exception:
         pass
 
 
-# ── Get changed files from diff ───────────────────────────────────────────────
+#        Get changed files from diff                                                                                                                                              
 def get_changed_files() -> list[tuple[str, str]]:
     """Returns list of (filename, diff_content) for reviewable files."""
     result = subprocess.run(
@@ -154,9 +154,9 @@ def get_changed_files() -> list[tuple[str, str]]:
     return changed
 
 
-# ── Format comment ────────────────────────────────────────────────────────────
-SEVERITY_EMOJI = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}
-SCORE_EMOJI    = lambda s: "🟢" if s >= 80 else "🟡" if s >= 60 else "🔴"
+#        Format comment                                                                                                                                                                                     
+SEVERITY_EMOJI = {"critical": "    ", "high": "    ", "medium": "    ", "low": "    "}
+SCORE_EMOJI    = lambda s: "    " if s >= 80 else "    " if s >= 60 else "    "
 
 
 def format_file_review(filename: str, review: dict) -> str:
@@ -175,22 +175,22 @@ def format_file_review(filename: str, review: dict) -> str:
     if issues:
         for issue in sorted(issues, key=lambda x: ["critical","high","medium","low"].index(x.get("severity","low"))):
             sev   = issue.get("severity", "low")
-            emoji = SEVERITY_EMOJI.get(sev, "⚪")
+            emoji = SEVERITY_EMOJI.get(sev, "   ")
             line  = f" (line {issue['line']})" if issue.get("line") else ""
-            lines.append(f"**{emoji} {sev.upper()} — {issue.get('title','')}**{line}")
+            lines.append(f"**{emoji} {sev.upper()}     {issue.get('title','')}**{line}")
             lines.append(f"{issue.get('description','')}")
             if issue.get("fix"):
                 lines.append(f"```\n{issue['fix']}\n```")
             lines.append("")
 
     if warns:
-        lines.append("**⚠️ Warnings**")
+        lines.append("**       Warnings**")
         for w in warns:
-            lines.append(f"- **{w.get('title','')}** — {w.get('description','')}")
+            lines.append(f"- **{w.get('title','')}**     {w.get('description','')}")
         lines.append("")
 
     if sugs:
-        lines.append("**💡 Suggestions**")
+        lines.append("**     Suggestions**")
         for s in sugs:
             lines.append(f"- {s}")
         lines.append("")
@@ -204,10 +204,10 @@ def format_full_comment(file_reviews: list[tuple[str, dict]]) -> str:
     files_count  = len(file_reviews)
 
     header = [
-        "## 🔍 AI Code Review",
+        "##      AI Code Review",
         "",
-        f"Reviewed **{files_count} file(s)** · "
-        f"Average score: **{avg_score}/100** {SCORE_EMOJI(avg_score)} · "
+        f"Reviewed **{files_count} file(s)**    "
+        f"Average score: **{avg_score}/100** {SCORE_EMOJI(avg_score)}    "
         f"Total issues: **{total_issues}**",
         "",
         "---",
@@ -222,13 +222,13 @@ def format_full_comment(file_reviews: list[tuple[str, dict]]) -> str:
 
     footer = [
         "<sub>Generated by [mcp-code-sanitizer](https://github.com/notasandy/mcp-code-sanitizer) "
-        "powered by Groq 🤖</sub>",
+        "powered by Groq     </sub>",
     ]
 
     return "\n".join(header + body + footer)
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+#        Main                                                                                                                                                                                                                   
 def main() -> None:
     print("Getting changed files...")
     changed = get_changed_files()
@@ -241,12 +241,12 @@ def main() -> None:
     file_reviews = []
 
     for filename, diff in changed:
-        print(f"  → {filename}")
+        print(f"      {filename}")
         try:
             review = call_groq(diff, filename)
             file_reviews.append((filename, review))
         except Exception as e:
-            print(f"  ✗ Error reviewing {filename}: {e}")
+            print(f"      Error reviewing {filename}: {e}")
             file_reviews.append((filename, {
                 "score": 0, "summary": f"Review failed: {e}",
                 "issues": [], "warnings": [], "suggestions": [],
@@ -256,7 +256,7 @@ def main() -> None:
     delete_old_bot_comments()
     comment = format_full_comment(file_reviews)
     post_comment(comment)
-    print("Done! ✓")
+    print("Done!    ")
 
     # Fail the check if any critical issues found
     has_critical = any(

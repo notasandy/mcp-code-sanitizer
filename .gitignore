@@ -9,3 +9,4 @@ venv/
 *.cast
 *.gif
 claude_desktop_config.json
+.claude/

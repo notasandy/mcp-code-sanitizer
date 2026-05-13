@@ -11,10 +11,34 @@ Tools:
 """
 import sys
 import io
+import os
 
 if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
-    sys.stdin  = io.TextIOWrapper(sys.stdin.buffer,  encoding="utf-8")
+    os.environ["PYTHONUTF8"] = "1"
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+
+    sys.stdout = io.TextIOWrapper(
+        sys.stdout.buffer,
+        encoding="utf-8",
+        errors="replace",
+        line_buffering=True,
+    )
+
+    sys.stderr = io.TextIOWrapper(
+        sys.stderr.buffer,
+        encoding="utf-8",
+        errors="replace",
+        line_buffering=True,
+    )
+
+    sys.stdin = io.TextIOWrapper(
+        sys.stdin.buffer,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+print("stdout:", sys.stdout.encoding, file=sys.stderr)
+print("stderr:", sys.stderr.encoding, file=sys.stderr)
 
 from pathlib import Path
 
