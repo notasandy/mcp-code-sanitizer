@@ -1,11 +1,8 @@
-﻿import json
+import json
 import math
 from pathlib import Path
-
 from groq_client import error_response
-
 _SEVERITY_ORDER = ["critical", "high", "medium", "low"]
-
 _CSS = """
 :root {
   --bg:#0f1117; --surface:#1a1d2e; --surface2:#252840; --border:#2e3150;
@@ -16,10 +13,8 @@ _CSS = """
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:2rem 1rem}
 .wrap{max-width:960px;margin:0 auto}
-
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
 .card+.card{margin-top:1.25rem}
-
 .header{background:linear-gradient(135deg,var(--surface),var(--surface2));padding:2rem;border-radius:var(--r);margin-bottom:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow)}
 .header h1{font-size:1.6rem;font-weight:700}
 .header h1 span{color:var(--purple)}
@@ -31,7 +26,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800}
 .verdict{font-size:1rem;line-height:1.6;color:var(--muted)}
 .verdict b{color:var(--text)}
-
 .pills{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap}
 .pill{flex:1;min-width:110px;text-align:center;padding:.9rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow)}
 .pill .n{font-size:1.8rem;font-weight:800;line-height:1}
@@ -40,10 +34,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .pill.high .n{color:var(--high)}
 .pill.medium .n{color:var(--medium)}
 .pill.low .n{color:var(--low)}
-
 .sec-head{display:flex;align-items:center;gap:.6rem;padding:.9rem 1.25rem;font-weight:700;font-size:.95rem;border-bottom:1px solid var(--border);background:var(--surface2);border-radius:var(--r) var(--r) 0 0}
 .sec-head .cnt{margin-left:auto;background:var(--border);border-radius:20px;padding:.1rem .55rem;font-size:.78rem;color:var(--muted)}
-
 .issue{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
 .issue:last-child{border-bottom:none}
 .issue-top{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:.5rem}
@@ -57,28 +49,21 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .issue-desc{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:.6rem}
 .fix-label{font-size:.72rem;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
 .fix{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.7rem 1rem;font-family:monospace;font-size:.85rem;color:var(--green);white-space:pre-wrap;word-break:break-all}
-
 .warn,.sug{padding:.85rem 1.25rem;border-bottom:1px solid var(--border)}
 .warn:last-child,.sug:last-child{border-bottom:none}
 .warn-title{font-weight:600;font-size:.9rem;color:var(--medium);margin-bottom:.3rem}
 .warn-desc,.sug-text{color:var(--muted);font-size:.87rem;line-height:1.5}
-.sug-text::before{content:"→ ";color:var(--blue);font-weight:700}
-
+.sug-text::before{content:"-> ";color:var(--blue);font-weight:700}
 .empty{padding:1.5rem;text-align:center;color:var(--muted);font-size:.9rem}
-.empty::before{content:"✓ ";color:var(--green)}
-
+.empty::before{content:"    ";color:var(--green)}
 .footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border)}
 """
-
-
 def _score_color(score: int) -> str:
     if score >= 80:
         return "#2ed573"
     if score >= 60:
         return "#ffa502"
     return "#ff4757"
-
-
 def _ring(score: int) -> str:
     color = _score_color(score)
     r = 34
@@ -94,8 +79,6 @@ def _ring(score: int) -> str:
         f'<div class="ring-val" style="color:{color}">{score}</div>'
         f'</div>'
     )
-
-
 def _issue_card(issue: dict) -> str:
     sev      = issue.get("severity", "low")
     line     = f'line {issue["line"]}' if issue.get("line") else ""
@@ -112,8 +95,6 @@ def _issue_card(issue: dict) -> str:
         f'{fix_html}'
         f'</div>'
     )
-
-
 def _section(icon: str, title: str, items_html: str, count: int) -> str:
     return (
         f'<div class="card">'
@@ -121,8 +102,6 @@ def _section(icon: str, title: str, items_html: str, count: int) -> str:
         f'{items_html}'
         f'</div>'
     )
-
-
 def build_html(data: dict, source_name: str = "") -> str:
     score       = data.get("score", 0)
     summary     = data.get("summary", "")
@@ -133,13 +112,11 @@ def build_html(data: dict, source_name: str = "") -> str:
     filename    = data.get("file", source_name)
     lang        = data.get("language", "")
     lines       = data.get("lines", "")
-
     meta = "".join([
         f'<span><b>{filename}</b></span>' if filename else "",
         f'<span>Language: <b>{lang}</b></span>' if lang else "",
         f'<span>Lines: <b>{lines}</b></span>' if lines else "",
     ])
-
     header = (
         f'<div class="header">'
         f'<h1>Code Sanitizer <span>Report</span></h1>'
@@ -149,12 +126,10 @@ def build_html(data: dict, source_name: str = "") -> str:
         f'<div class="verdict"><b>Verdict:</b> {summary}</div>'
         f'</div></div>'
     )
-
     pills = "".join(
         f'<div class="pill {s}"><div class="n">{stats.get(s, 0)}</div><div class="l">{s}</div></div>'
         for s in _SEVERITY_ORDER
     ) if stats else ""
-
     sorted_issues = sorted(issues, key=lambda x: _SEVERITY_ORDER.index(x.get("severity", "low")))
     issues_html   = "".join(_issue_card(i) for i in sorted_issues) or '<div class="empty">No issues found</div>'
     warns_html    = "".join(
@@ -166,25 +141,21 @@ def build_html(data: dict, source_name: str = "") -> str:
         f'<div class="sug"><div class="sug-text">{s}</div></div>'
         for s in suggestions
     ) or '<div class="empty">No suggestions</div>'
-
     body = (
         header
         + (f'<div class="pills">{pills}</div>' if pills else "")
-        + _section("🔴", "Issues", issues_html, len(issues))
-        + _section("⚠️", "Warnings", warns_html, len(warnings))
-        + _section("💡", "Suggestions", sugs_html, len(suggestions))
-        + '<div class="footer">Generated by <b>mcp-code-sanitizer</b> · Powered by Groq</div>'
+        + _section("    ", "Issues", issues_html, len(issues))
+        + _section("      ", "Warnings", warns_html, len(warnings))
+        + _section("    ", "Suggestions", sugs_html, len(suggestions))
+        + '<div class="footer">Generated by <b>mcp-code-sanitizer</b>    Powered by Groq</div>'
     )
-
     return (
         f'<!DOCTYPE html><html lang="en"><head>'
         f'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>Code Sanitizer — {filename or "Report"}</title>'
+        f'<title>Code Sanitizer - {filename or "Report"}</title>'
         f'<style>{_CSS}</style></head>'
         f'<body><div class="wrap">{body}</div></body></html>'
     )
-
-
 async def generate_report(
     analysis_json: str,
     output_path: str = "",
@@ -192,12 +163,10 @@ async def generate_report(
 ) -> str:
     """
     Generates a beautiful HTML report from analyze_code or analyze_file results.
-
     Args:
         analysis_json: JSON string from analyze_code or analyze_file.
         output_path:   Path to save the HTML file (optional).
         source_name:   File/fragment name for the report title.
-
     Returns:
         JSON with fields: html, saved_to, length.
     """
@@ -205,10 +174,8 @@ async def generate_report(
         data = json.loads(analysis_json)
     except json.JSONDecodeError as e:
         return error_response("Invalid JSON in analysis_json", str(e))
-
     html     = build_html(data, source_name=source_name)
     saved_to = ""
-
     if output_path:
         out = Path(output_path).expanduser().resolve()
         try:
@@ -217,5 +184,5 @@ async def generate_report(
             saved_to = str(out)
         except OSError as e:
             return error_response("Failed to save file", str(e))
-
     return json.dumps({"html": html, "saved_to": saved_to, "length": len(html)}, ensure_ascii=True)
+

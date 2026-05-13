@@ -4,19 +4,21 @@ from groq_client import call, error_response
 from prompts import ANALYZE
 import cache
 
-
 async def analyze_code(code: str, language: str = "python", context: str = "") -> str:
+
     """
     Strict analysis of a code fragment using Groq LLM.
 
     Args:
         code:     Code fragment to review.
         language: Programming language (python, javascript, go, rust, ...).
-        context:  Optional description — what the code does or where it came from.
+        context:  Optional description - what the code does or where it came from.
 
     Returns:
         JSON with fields: issues, warnings, suggestions, score.
+
     """
+
     if not code.strip():
         return error_response("Empty code provided.")
 
@@ -30,6 +32,7 @@ async def analyze_code(code: str, language: str = "python", context: str = "") -
     try:
         raw = await call(ANALYZE, user)
         result = json.loads(raw)
+
     except httpx.HTTPStatusError as e:
         return error_response(f"Groq API error {e.response.status_code}", e.response.text[:300])
     except json.JSONDecodeError as e:
@@ -37,6 +40,9 @@ async def analyze_code(code: str, language: str = "python", context: str = "") -
     except ValueError as e:
         return error_response(str(e))
 
+
+
     out = json.dumps(result, ensure_ascii=True, indent=2)
     cache.set(key, out)
     return out
+

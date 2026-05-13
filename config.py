@@ -4,7 +4,7 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL   = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
-CHUNK_SIZE = 6_000   # ~12k токенов на запрос
+CHUNK_SIZE = 6_000   # ~12k                                 
 CACHE_TTL  = int(os.getenv("CACHE_TTL", "3600"))
 CACHE_MAX  = int(os.getenv("CACHE_MAX", "200"))
 
