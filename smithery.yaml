@@ -1,0 +1,21 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      groqApiKey:
+        type: string
+        title: Groq API Key
+        description: >
+          Free API key from console.groq.com/keys — no credit card required.
+    required:
+      - groqApiKey
+  commandFunction: |-
+    (config) => ({
+      command: "uvx",
+      args: ["mcp-code-sanitizer"],
+      env: {
+        GROQ_API_KEY: config.groqApiKey,
+        PYTHONUTF8: "1"
+      }
+    })
