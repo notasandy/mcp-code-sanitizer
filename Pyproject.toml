@@ -1,6 +1,6 @@
 [project]
 name = "mcp-code-sanitizer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Strict AI code reviewer MCP server powered by Groq — finds bugs, vulnerabilities and security issues"
 readme = "README.md"
 requires-python = ">=3.10"

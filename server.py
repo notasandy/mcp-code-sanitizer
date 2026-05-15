@@ -10,35 +10,20 @@ Tools:
   cache_info      - cache statistics and clearing
 """
 import sys
-import io
 import os
 
-if sys.platform == "win32":
-    os.environ["PYTHONUTF8"] = "1"
-    os.environ["PYTHONIOENCODING"] = "utf-8"
+# Force UTF-8 for all I/O before anything else loads.
+# Must be done early: Groq returns non-ASCII and the MCP transport
+# will fail with 'ascii' codec errors on default Windows/some Linux setups.
+os.environ["PYTHONUTF8"] = "1"
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
-    sys.stdout = io.TextIOWrapper(
-        sys.stdout.buffer,
-        encoding="utf-8",
-        errors="replace",
-        line_buffering=True,
-    )
-
-    sys.stderr = io.TextIOWrapper(
-        sys.stderr.buffer,
-        encoding="utf-8",
-        errors="replace",
-        line_buffering=True,
-    )
-
-    sys.stdin = io.TextIOWrapper(
-        sys.stdin.buffer,
-        encoding="utf-8",
-        errors="replace",
-    )
-
-print("stdout:", sys.stdout.encoding, file=sys.stderr)
-print("stderr:", sys.stderr.encoding, file=sys.stderr)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stdin, "reconfigure"):
+    sys.stdin.reconfigure(encoding="utf-8", errors="replace")
 
 from pathlib import Path
 
