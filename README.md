@@ -9,7 +9,6 @@
 ![FastMCP](https://img.shields.io/badge/FastMCP-2.x-purple)
 ![Groq](https://img.shields.io/badge/Groq-Free_API-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
-[![smithery badge](https://smithery.ai/badge/io.github.notasandy/mcp-code-sanitizer)](https://smithery.ai/server/io.github.notasandy/mcp-code-sanitizer)
 
 ```
 Claude / Cursor / VS Code  ──MCP──►  code-sanitizer  ──REST──►  Groq API
